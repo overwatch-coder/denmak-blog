@@ -6,9 +6,10 @@ const Post = require('../model/post.model');
 
 // user sign up controller
 const registerUser = async (req, res) => {
+
     const { email, password, username, fullname, phone, photo } = req.body;
 
-    if(!email || !password || !username || !fullname) return res.status(401).json({message: 'Fields marked with * are all required!'})
+    if(!email || !password || !username || !fullname) return res.status(400).json({message: 'Fields marked with * are all required!'});
 
     try {
         const foundUserByEmail = await User.findOne({ email });
@@ -44,11 +45,15 @@ const registerUser = async (req, res) => {
                 username
             }
             const token = jwt.sign(uid, process.env.JWT_SECRET);
-          return res.status(200).json({user, token, message: 'User registration successful'});
+
+            return res.cookie("access_token", token, {
+                httpOnly: true,
+                secure: true
+            }).status(200).json({user, message: 'User registration successful'});
         }
 
     } catch (error) {
-        return res.status(400).json({message: error.message});
+        return res.status(500).json({message: "User registration Error! Please try again later!"});
     }
 }
 
@@ -57,7 +62,7 @@ const registerUser = async (req, res) => {
 const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
-    if(!email || !password) return res.status(401).json({message: 'All fields are required'});
+    if(!email || !password) return res.status(400).json({message: 'All fields are required'});
     try {
 
         const findUserByEmail = await User.findOne({email});
@@ -78,10 +83,13 @@ const loginUser = async (req, res) => {
 
         const token = jwt.sign(findUserByEmail.uid, process.env.JWT_SECRET);
 
-        return res.status(200).json({message: 'User successfully logged in', token, user});
+        return res.cookie("access_token", token, {
+            httpOnly: true,
+            secure: true
+        }).status(200).json({message: 'User successfully logged in', user});
 
     } catch (error) {
-       return res.status(400).json({message: error.message});
+       return res.status(500).json({message: "Login Error! Please try again later!"});
     }
 }
 
@@ -91,7 +99,7 @@ const loginUser = async (req, res) => {
 const updateUser = async (req, res) => {
     const userData = req.body;
     const user = req?.user;
-    if(!user) return res.status(500).json({messahe: 'Not authorized to access this route'});
+    if(!user) return res.status(401).json({messahe: 'Not authorized to access this route'});
 
     try {
 
@@ -116,14 +124,14 @@ const updateUser = async (req, res) => {
         }
 
     } catch (error) {
-        res.status(400).json({message: error.message});
+        res.status(500).json({message: "Update Error! Please try again later!"});
     }
 }
 
 // Delete User Controller
 const deleteUser = async (req, res) => {
     const user = req?.user;
-    if(!user) return res.status(500).json({messahe: 'Not authorized to access this route'});
+    if(!user) return res.status(401).json({message: 'Not authorized to access this route'});
 
     try {
 
@@ -140,8 +148,17 @@ const deleteUser = async (req, res) => {
         }
 
     } catch (error) {
-        res.status(400).json({message: error.message});
+        res.status(500).json({message: "Account Deletion Error! Please try again later!"});
     }
+}
+
+// logout user
+const logout = async (req, res) => {
+    req.user = '';
+    res.clearCookie("access_token", {
+        secure: true,
+        sameSite: 'none'
+    }).status(200).json({message: "Logout successful"})
 }
 
 
@@ -151,5 +168,6 @@ module.exports = {
     loginUser,
     registerUser,
     updateUser,
-    deleteUser
+    deleteUser,
+    logout
 }

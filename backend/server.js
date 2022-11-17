@@ -7,9 +7,9 @@ const mongoose = require('mongoose');
 
 
 // custom imports
-const postRoutes = require('./routes/post.routes');
-const authPostRoutes = require('./routes/auth-post.routes');
-const authRoutes = require('./routes/auth-user.routes');
+const postRoutes = require('./api/post.routes');
+const authPostRoutes = require('./api/auth-post.routes');
+const authRoutes = require('./api/auth-user.routes');
 
 
 // initialise express app

@@ -2,7 +2,7 @@
   "name": "denmak-blog",
   "version": "1.0.0",
   "description": "Backend server and api of the denmak blog application",
-  "main": "server.js",
+  "main": "index.js",
   "author": "Overwatch Coder",
   "license": "MIT",
   "scripts": {

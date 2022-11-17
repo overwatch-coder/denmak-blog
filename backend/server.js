@@ -31,7 +31,10 @@ mongoose.connect(process.env.MONGODB_URI).then(() => {
 
 
 // setting routes
-app.use('/auth', authRoutes);
+app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
-app.use('/auth/api/posts', authPostRoutes);
+app.use('/api/auth/posts', authPostRoutes);
 app.use('*', (req, res) => res.redirect('/'));
+
+
+module.exports = app;

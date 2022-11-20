@@ -44,7 +44,7 @@ const addPost = async (req, res) => {
     const user = req.user;
     if(!user) return res.status(401).json({message: "No token found, not authenticated"});
 
-    const { title, content, image, comments, category } = req.body;
+    const { title, content, comments, category } = req.body;
     if(!title || !content ) return res.status(400).json({message: 'Title & Content fields are required'});
 
     try {
@@ -55,7 +55,7 @@ const addPost = async (req, res) => {
             title,
             author: username.username,
             content,
-            image, 
+            image: req.file.filename, 
             comments,
             category,
             uid: user,
@@ -72,7 +72,6 @@ const addPost = async (req, res) => {
     } catch (error) {
         res.status(500).json({message: "Error! Failure to create post! Try again later"});
     }
-
 }
 
 // Update Post Controller
@@ -86,8 +85,27 @@ const updatePost = async (req, res) => {
     const slug = req?.body?.title?.replace(/\s+/g, '-').toLowerCase().replace(/\?/g, '');
 
     try {
-        const post = await Post.findOneAndUpdate({$and: [{uid: user}, {_id: id}]}, {...req.body, slug: slug}, {new: true});
+        const userPost = await Post.findOne({$and: [{uid: user}, {_id: id}]});
+
+        if(!userPost){
+            return res.status(403).json({message: "Unauthorized to update another user's posts"});
+        }
+
+        let comments = [];
+        if(userPost.comments.length > 0){
+            comments = [...userPost.comments, req.body.comments];
+        }else{
+            comments = {...req.body.comments};
+        }
+
+        const post = await Post.findOneAndUpdate({$and: [{uid: user}, {_id: id}]}, {...req.body, slug: slug, comments}, {new: true});
+
+        if(!post){
+            res.status(500).json({message: 'An error occurred!!'})
+        }
+
         res.status(200).json({message: 'Post updated successfully', data: post});
+        
     } catch (error) {
         res.status(500).json({message: "Error! Failure to update post! Try again later"});
     }

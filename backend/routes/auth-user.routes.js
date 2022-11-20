@@ -1,6 +1,7 @@
 const express = require('express');
 const { loginUser, registerUser, updateUser, deleteUser, logout } = require('../controller/auth.controller');
 const authUser = require('../middleware/auth.middeware');
+const upload = require('../middleware/uploadFile');
 
 // initialise express router
 const router = express.Router();
@@ -9,7 +10,7 @@ const router = express.Router();
 router.post('/login', loginUser);
 
 // register user
-router.post('/register', registerUser);
+router.post('/register', upload.single('photo'), registerUser);
 
 // apply middleware in authenticate user
 router.use(authUser);

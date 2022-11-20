@@ -7,7 +7,7 @@ const Post = require('../model/post.model');
 // user sign up controller
 const registerUser = async (req, res) => {
 
-    const { email, password, username, fullname, phone, photo } = req.body;
+    const { email, password, username, fullname, phone } = req.body;
 
     if(!email || !password || !username || !fullname) return res.status(400).json({message: 'Fields marked with * are all required!'});
 
@@ -28,7 +28,7 @@ const registerUser = async (req, res) => {
             username, 
             fullname,  
             phone,
-            photo,
+            photo: req.file.filename,
             uid: uuid()
         }
 
@@ -44,6 +44,7 @@ const registerUser = async (req, res) => {
                 phone,
                 username
             }
+
             const token = jwt.sign(uid, process.env.JWT_SECRET);
 
             return res.cookie("access_token", token, {
@@ -94,12 +95,12 @@ const loginUser = async (req, res) => {
 }
 
 
-
 // Update User Controller
 const updateUser = async (req, res) => {
     const userData = req.body;
+    
     const user = req?.user;
-    if(!user) return res.status(401).json({messahe: 'Not authorized to access this route'});
+    if(!user) return res.status(401).json({message: 'Not authorized to access this route'});
 
     try {
 

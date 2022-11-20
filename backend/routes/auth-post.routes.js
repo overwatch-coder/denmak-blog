@@ -8,6 +8,7 @@ const {
     deletePost 
 } = require('../controller/auth-post.controller');
 const authUser = require('../middleware/auth.middeware');
+const upload = require('../middleware/uploadFile');
 
 // initialise express router
 const router = express.Router();
@@ -21,7 +22,7 @@ router.get('/', getPosts);
 router.get('/:slug', getPost);
 
 // add Post route
-router.post('/', addPost);
+router.post('/', upload.single('image'), addPost);
 
 // update Post
 router.put('/:id', updatePost);
